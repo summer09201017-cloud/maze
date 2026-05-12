@@ -148,8 +148,9 @@ export class GameEngine {
     this.applyThemeToDOM(config.theme);
 
     this.maze = generateMaze(config.rows, config.cols);
-    this.exitRow = config.rows - 1;
-    this.exitCol = config.cols - 1;
+    const exit = this.pickExit(config);
+    this.exitRow = exit.row;
+    this.exitCol = exit.col;
 
     resetPlayer(this.player);
     this.elapsedTime = 0;
@@ -330,9 +331,32 @@ export class GameEngine {
       }
     }
 
-    if (this.player.cellX === this.exitCol && this.player.cellY === this.exitRow && !this.player.isMoving) {
+    if (this.hasReachedExit()) {
       this.onWin();
     }
+  }
+
+  private pickExit(config: LevelConfig): { row: number; col: number } {
+    const exits = [
+      { row: config.rows - 1, col: config.cols - 1 },
+      { row: config.rows - 1, col: 0 },
+      { row: 0, col: config.cols - 1 },
+    ];
+    return exits[Math.floor(Math.random() * exits.length)];
+  }
+
+  private hasReachedExit(): boolean {
+    if (this.settings.movementMode === 'free') {
+      const distance = Math.hypot(
+        this.player.pixelX - this.exitCol,
+        this.player.pixelY - this.exitRow
+      );
+      return distance <= 0.45;
+    }
+
+    return this.player.cellX === this.exitCol
+      && this.player.cellY === this.exitRow
+      && !this.player.isMoving;
   }
 
   private onWin(): void {
