@@ -360,6 +360,8 @@ export class GameEngine {
   }
 
   private onWin(): void {
+    // 📡 統計:完賽打點(index.html 的 psDone;沒有就靜默)
+    (window as unknown as { psDone?: () => void }).psDone?.();
     this.state = 'won';
     const config = LEVELS[this.currentLevel];
     const stars = calculateStars(config, this.elapsedTime, this.player.steps);
